@@ -1,0 +1,43 @@
+const admin = require('firebase-admin');
+
+// Path to the service account key file
+const serviceAccount = require('current-abf8d-firebase-adminsdk-pbcdo-7cbf82ff50.json');
+
+// Initialize the app with a service account, granting admin privileges
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+const firestore = admin.firestore();
+
+// Helper function to upload data to Firestore
+const uploadData = (collectionName, data) => {
+  data.forEach(async (item) => {
+    const document = firestore.collection(collectionName).doc();
+    await document.set(item);
+    console.log(`Successfully added document with ID: ${document.id}`);
+  });
+};
+
+// Function to import JSON data into Firestore
+const importData = () => {
+  // Paths to JSON files
+  const jsonFiles = {
+    bases: 'https://eipa.udt.gov.pl/reader/export-data/pool/51446e138fd133fa8e4166f8b70de8b7',
+    stations: 'https://eipa.udt.gov.pl/reader/export-data/station/51446e138fd133fa8e4166f8b70de8b7',
+    dynamic: 'https://eipa.udt.gov.pl/reader/export-data/dynamic/51446e138fd133fa8e4166f8b70de8b7',
+    operators: 'https://eipa.udt.gov.pl/reader/export-data/operator/51446e138fd133fa8e4166f8b70de8b7',
+    points: 'https://eipa.udt.gov.pl/reader/export-data/point/51446e138fd133fa8e4166f8b70de8b7',
+    dictionary: 'https://eipa.udt.gov.pl/reader/export-data/dictionary/51446e138fd133fa8e4166f8b70de8b7'
+  };
+
+  // Loop over the files and upload to Firestore
+  for (const [collectionName, filePath] of Object.entries(jsonFiles)) {
+    const jsonData = require(filePath);
+    const dataArray = jsonData.data; // Assuming each JSON file has a 'data' key with an array of documents
+    uploadData(collectionName, dataArray);
+  }
+};
+
+// Start the import
+importData();
