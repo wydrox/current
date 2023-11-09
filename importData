@@ -1,7 +1,7 @@
 const admin = require('firebase-admin');
 
 // Path to the service account key file
-const serviceAccount = require('current-abf8d-firebase-adminsdk-pbcdo-7cbf82ff50.json');
+const serviceAccount = require('./current-abf8d-firebase-adminsdk-pbcdo-7cbf82ff50.json');
 
 // Initialize the app with a service account, granting admin privileges
 admin.initializeApp({
@@ -23,18 +23,23 @@ const uploadData = (collectionName, data) => {
 const importData = () => {
   // Paths to JSON files
   const jsonFiles = {
-    bases: 'https://eipa.udt.gov.pl/reader/export-data/pool/51446e138fd133fa8e4166f8b70de8b7',
-    stations: 'https://eipa.udt.gov.pl/reader/export-data/station/51446e138fd133fa8e4166f8b70de8b7',
-    dynamic: 'https://eipa.udt.gov.pl/reader/export-data/dynamic/51446e138fd133fa8e4166f8b70de8b7',
-    operators: 'https://eipa.udt.gov.pl/reader/export-data/operator/51446e138fd133fa8e4166f8b70de8b7',
-    points: 'https://eipa.udt.gov.pl/reader/export-data/point/51446e138fd133fa8e4166f8b70de8b7',
-    dictionary: 'https://eipa.udt.gov.pl/reader/export-data/dictionary/51446e138fd133fa8e4166f8b70de8b7'
+    bases: './files/bases_data.json',
+    stations: './files/stations_data.json',
+    dynamic: './files/dynamic_data.json',
+    operators: './files/operators_data.json',
+    points: './files/points_data.json',
+    dictionary: './files/dictionaries.json'
   };
 
   // Loop over the files and upload to Firestore
   for (const [collectionName, filePath] of Object.entries(jsonFiles)) {
     const jsonData = require(filePath);
-    const dataArray = jsonData.data; // Assuming each JSON file has a 'data' key with an array of documents
+    if (!jsonData.data) {
+      console.error(`No data key found in ${filePath}`);
+      continue;
+    }
+    const dataArray = jsonData.data;
+    console.log(`Importing ${dataArray.length} items to collection ${collectionName}`);
     uploadData(collectionName, dataArray);
   }
 };
