@@ -13,5 +13,8 @@
     "firebase": "^10.5.2",
     "firebase-admin": "^11.11.0",
     "vue": "^3.3.8"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "^5.0.8"
   }
 }
